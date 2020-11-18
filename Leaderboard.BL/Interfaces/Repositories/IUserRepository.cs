@@ -2,10 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Leaderboard.BL.Interfaces.Repositories
 {
-    public interface IUserRepository : IRepository<User>
+    public interface IUserRepository
     {
+        int Add(User entity);
+        User Get(int id);
+        IEnumerable<User> GetAll();
+        bool Update(User entity);
+        void Delete(int id);
     }
 }

@@ -1,4 +1,6 @@
-﻿using Leaderboard.BL.Entities;
+﻿using Leaderboard.BL.Dtos.UserDtos;
+using Leaderboard.BL.Entities;
+using Leaderboard.BL.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,6 +9,23 @@ namespace Leaderboard.Services.UserServices
 {
     public class UserService : IUserService
     {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public UserService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public int Create(CreateUserDto createUserDto)
+        {
+            return _unitOfWork.UserRepository.Add(new User { Username = createUserDto.Username });
+        }
+
+        public void Delete(int id)
+        {
+            _unitOfWork.UserRepository.Delete(id);
+        }
+
         public string DownloadLeaderboardByDay(DateTime day)
         {
             throw new NotImplementedException();
@@ -20,6 +39,16 @@ namespace Leaderboard.Services.UserServices
         public string DownloadLeaderboardByWeek(DateTime week)
         {
             throw new NotImplementedException();
+        }
+
+        public User Get(int id)
+        {
+            return _unitOfWork.UserRepository.Get(id);
+        }
+
+        public IEnumerable<User> GetAll()
+        {
+            return _unitOfWork.UserRepository.GetAll();
         }
 
         public string GetAllData()
@@ -52,9 +81,15 @@ namespace Leaderboard.Services.UserServices
             throw new NotImplementedException();
         }
 
+        public bool Update(User entity)
+        {
+            return _unitOfWork.UserRepository.Update(entity);
+        }
+
         public void UploadLeaderboardData(string filePath)
         {
             throw new NotImplementedException();
         }
+
     }
 }
