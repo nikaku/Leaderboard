@@ -10,6 +10,7 @@ namespace Leaderboard.BL.Interfaces.Repositories
     {
         int Add(User entity);
         User Get(int id);
+        User GetByUsername(string username);
         IEnumerable<User> GetAll();
         bool Update(User entity);
         void Delete(int id);

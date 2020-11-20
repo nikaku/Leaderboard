@@ -40,6 +40,14 @@ namespace Leaderboard.DB.Implementations.Repositories
             var res = _dbConnection.Query<User>(sql);
             return res;
         }
+
+        public User GetByUsername(string username)
+        {
+            var sql = "SELECT * FROM [dbo].[Users] WHERE username = @username";
+            var res = _dbConnection.Query<User>(sql, new { username }).SingleOrDefault();
+            return res;
+        }
+
         public bool Update(User entity)
         {
             var sql = "update [dbo].[Users] set Username = @Username where Id = @Id";

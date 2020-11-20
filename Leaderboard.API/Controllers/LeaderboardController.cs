@@ -56,5 +56,12 @@ namespace Leaderboard.API.Controllers
             var stats = _leaderboardService.GetStats();
             return Ok(stats);
         }
+
+        [HttpGet]
+        public IActionResult GetUserInfo(string username)
+        {
+            var stats = _leaderboardService.GetUserInfo(username);
+            return Ok(stats);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Leaderboard.BL.Dtos.LeaderboardDto;
+using Leaderboard.BL.Dtos.UserDtos;
 using Leaderboard.BL.Entities;
 using Leaderboard.BL.Interfaces;
 using System;
@@ -44,7 +45,8 @@ namespace Leaderboard.Services.LeaderboardServices
                 Username = x.First().Username,
                 Score = x.Sum(x => x.Score)
             });
-            return monthlyScores;
+
+            return monthlyScores.OrderByDescending(s => s.Score);
         }
 
         public IEnumerable<LeaderboardDto> GetAllData()
@@ -54,7 +56,53 @@ namespace Leaderboard.Services.LeaderboardServices
 
         public Stats GetStats()
         {
-           return _unitOfWork.UserScoreRepository.GetStats();
+            var dailyAvg = _unitOfWork.UserScoreRepository.GetDalyAvarage();
+            var weeklyAvg = _unitOfWork.UserScoreRepository.GetWeeklyAvarage();
+            var monthlyAvg = _unitOfWork.UserScoreRepository.GetMonthlyAvarage();
+            var dailyMax = _unitOfWork.UserScoreRepository.GetDalyMax();
+            var weeklyMax = _unitOfWork.UserScoreRepository.GetWeeklyMax();
+            var monthlyMax = _unitOfWork.UserScoreRepository.GetMonthlyMax();
+
+            return new Stats
+            {
+                DailyAvarage = dailyAvg,
+                WeeklyAvarage = weeklyAvg,
+                MonthlyAvarage = monthlyAvg,
+                DailyMax = dailyMax,
+                WeeklyMax = weeklyMax,
+                MonthlyMax = monthlyMax
+            };
+        }
+
+        public UserRating GetUserInfo(string username)
+        {
+            var currentMonthScores = _unitOfWork.UserScoreRepository
+                .GetScoresByMonth(DateTime.Now)
+                .GroupBy(u => u.Username).Select(x =>
+                     new LeaderboardDto
+                     {
+                         Username = x.First().Username,
+                         Score = x.Sum(x => x.Score)
+                     }).OrderByDescending(s => s.Score);
+
+            if (currentMonthScores.Count() == 0)
+            {
+                throw new Exception("Scores Doesnot Exists");
+            }
+
+            var userRating = currentMonthScores.Select((Value, Index) => new { Value, Index }).SingleOrDefault(p => p.Value.Username == username);
+
+            if (userRating == null)
+            {
+                throw new Exception("User Dont Have Scores");
+            }
+
+            return new UserRating
+            {
+                Username = userRating.Value.Username,
+                Rating = userRating.Index + 1,
+                Score = userRating.Value.Score
+            };
         }
     }
 }

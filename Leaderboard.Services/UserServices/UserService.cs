@@ -39,8 +39,14 @@ namespace Leaderboard.Services.UserServices
 
         public User GetUserInfo(string username)
         {
-            throw new NotImplementedException();
+            return _unitOfWork.UserRepository.GetByUsername(username);
         }
+
+        public User GetByUsername(string username)
+        {
+            return _unitOfWork.UserRepository.GetByUsername(username);
+        }
+
 
         public bool Update(User entity)
         {

@@ -1,4 +1,5 @@
 ﻿using Leaderboard.BL.Dtos.LeaderboardDto;
+using Leaderboard.BL.Dtos.UserDtos;
 using Leaderboard.BL.Entities;
 using System;
 using System.Collections.Generic;
@@ -13,5 +14,6 @@ namespace Leaderboard.Services.LeaderboardServices
         IEnumerable<LeaderboardDto> GetLeaderboardByMonth(DateTime month);
         IEnumerable<LeaderboardDto> GetAllData();
         Stats GetStats();
+        UserRating GetUserInfo(string username);
     }
 }

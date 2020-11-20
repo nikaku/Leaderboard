@@ -10,7 +10,11 @@ namespace Leaderboard.BL.Interfaces.Repositories
         IEnumerable<LeaderboardDto> GetScoresByWeek(DateTime week);
         IEnumerable<LeaderboardDto> GetScoresByMonth(DateTime month);
         IEnumerable<LeaderboardDto> GetAllData();
-        Stats GetStats();
-        
+        int GetDalyAvarage();
+        int GetWeeklyAvarage();
+        int GetMonthlyAvarage();
+        int GetDalyMax();
+        int GetWeeklyMax();
+        int GetMonthlyMax();
     }
 }

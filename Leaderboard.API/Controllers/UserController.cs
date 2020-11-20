@@ -23,13 +23,24 @@ namespace Leaderboard.API.Controllers
             _userService = userService;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public IActionResult Get(int id)
         {
             var user = _userService.Get(id);
             if (user == null)
             {
-                NotFound();
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
+        [HttpGet("{username}")]
+        public IActionResult GetByUsername(string username)
+        {
+            var user = _userService.GetByUsername(username);
+            if (user == null)
+            {
+                return NotFound();
             }
             return Ok(user);
         }
@@ -46,7 +57,7 @@ namespace Leaderboard.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register( CreateUserDto userDto)
+        public IActionResult Register(CreateUserDto userDto)
         {
             try
             {
