@@ -2,6 +2,7 @@ using Leaderboard.BL.Interfaces;
 using Leaderboard.BL.Interfaces.Repositories;
 using Leaderboard.DB.Implementations;
 using Leaderboard.DB.Implementations.Repositories;
+using Leaderboard.Services.LeaderboardServices;
 using Leaderboard.Services.UserServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,7 +38,9 @@ namespace Leaderboard.API
             services.AddTransient<IDbConnection>((sp) => new SqlConnection(connection));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserScoreRepository, UserScoreRepository>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ILeaderboardService, LeaderboardService>();
 
             services.AddSwaggerGen(c =>
             {   

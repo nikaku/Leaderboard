@@ -5,6 +5,7 @@ namespace Leaderboard.BL.Interfaces
     public interface IUnitOfWork
     {
         public IUserRepository UserRepository { get; }
+        public IUserScoreRepository UserScoreRepository { get; }
         void SaveChanges();
         void Dispose();
     }

@@ -8,6 +8,7 @@ namespace Leaderboard.BL.Entities
     {
         public int Id { get; set; }
         public int Score { get; set; }
+        public int UserId { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
     }
