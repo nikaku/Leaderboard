@@ -3,6 +3,7 @@ using Leaderboard.BL.Interfaces.Repositories;
 using Leaderboard.DB.Implementations;
 using Leaderboard.DB.Implementations.Repositories;
 using Leaderboard.Services.LeaderboardServices;
+using Leaderboard.Services.UserScoreService;
 using Leaderboard.Services.UserServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -41,6 +42,7 @@ namespace Leaderboard.API
             services.AddScoped<IUserScoreRepository, UserScoreRepository>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ILeaderboardService, LeaderboardService>();
+            services.AddScoped<IUserScoreService, UserScoreService>();
 
             services.AddSwaggerGen(c =>
             {   

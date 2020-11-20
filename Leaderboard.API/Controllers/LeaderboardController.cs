@@ -13,12 +13,10 @@ namespace Leaderboard.API.Controllers
     [ApiController]
     public class LeaderboardController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly ILeaderboardService _leaderboardService;
 
-        public LeaderboardController(IUnitOfWork unitOfWork, ILeaderboardService leaderboardService)
+        public LeaderboardController(ILeaderboardService leaderboardService)
         {
-            _unitOfWork = unitOfWork;
             _leaderboardService = leaderboardService;
         }
 

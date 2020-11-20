@@ -13,9 +13,11 @@ namespace Leaderboard.DB.Implementations.Repositories
     public class UserScoreRepository : IUserScoreRepository
     {
         private IDbConnection _dbConnection;
-        public UserScoreRepository(IDbConnection dbConnection)
+        private IUserRepository _userRepository;
+        public UserScoreRepository(IDbConnection dbConnection, IUserRepository userRepository)
         {
             _dbConnection = dbConnection;
+            _userRepository = userRepository;
         }
         public IEnumerable<LeaderboardDto> GetScoresByDay(DateTime date)
         {
@@ -109,6 +111,49 @@ namespace Leaderboard.DB.Implementations.Repositories
                $"    GROUP BY DATEPART(month, ScoreDate)) weeklySum";
             int maxScore = _dbConnection.Query<int>(sql).FirstOrDefault();
             return maxScore;
+        }
+
+        public void Add(LeaderboardDto leaderboardDto, DateTime scoreDate)
+        {
+            string sql = string.Empty;
+            var user = _userRepository.GetByUsername(leaderboardDto.Username);
+
+            if (user == null)
+            {
+                sql = @" DECLARE @id INT;
+                         BEGIN TRY
+                         BEGIN TRANSACTION
+                         INSERT INTO Users(Username)  VALUES(@Username) set @id = (SELECT SCOPE_IDENTITY())
+                         INSERT INTO UserScores(UserId, Score, ScoreDate, CreateDate) VALUES(@id, @Score, @ScoreDate, @CreateDate)
+                         COMMIT TRANSACTION
+                         END TRY
+                         BEGIN CATCH
+                         ROLLBACK TRANSACTION
+                         END CATCH";
+
+                _dbConnection.Query<int>(sql,
+                    new
+                    {
+                        Username = leaderboardDto.Username,
+                        Score = leaderboardDto.Score,
+                        ScoreDate = scoreDate,
+                        CreateDate = DateTime.Now
+                    }
+                ).FirstOrDefault();
+            }
+            else
+            {
+                sql = "INSERT INTO UserScores(UserId, Score, ScoreDate, CreateDate) VALUES(@id, @Score, @ScoreDate, @CreateDate)";
+                _dbConnection.Query<int>(sql,
+                    new
+                    {
+                        id = user.Id,
+                        Score = leaderboardDto.Score,
+                        ScoreDate = scoreDate,
+                        CreateDate = DateTime.Now
+                    }
+                ).FirstOrDefault();
+            }
         }
     }
 }

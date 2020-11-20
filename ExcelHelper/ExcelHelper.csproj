@@ -5,8 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ExcelHelper\ExcelHelper.csproj" />
-    <ProjectReference Include="..\Leaderboard.BL\Leaderboard.BL.csproj" />
+    <PackageReference Include="System.Data.OleDb" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

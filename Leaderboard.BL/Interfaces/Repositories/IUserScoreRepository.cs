@@ -1,4 +1,5 @@
 ﻿using Leaderboard.BL.Dtos.LeaderboardDto;
+using Leaderboard.BL.Entities;
 using System;
 using System.Collections.Generic;
 
@@ -16,5 +17,6 @@ namespace Leaderboard.BL.Interfaces.Repositories
         int GetDalyMax();
         int GetWeeklyMax();
         int GetMonthlyMax();
+        void Add(LeaderboardDto leaderboardDto, DateTime scoreDate);
     }
 }
