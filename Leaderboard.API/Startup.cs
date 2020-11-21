@@ -1,7 +1,9 @@
+using ExcelHelper.ExportImport;
 using Leaderboard.BL.Interfaces;
 using Leaderboard.BL.Interfaces.Repositories;
 using Leaderboard.DB.Implementations;
 using Leaderboard.DB.Implementations.Repositories;
+using Leaderboard.Services.ImportExport;
 using Leaderboard.Services.LeaderboardServices;
 using Leaderboard.Services.UserScoreService;
 using Leaderboard.Services.UserServices;
@@ -43,6 +45,13 @@ namespace Leaderboard.API
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ILeaderboardService, LeaderboardService>();
             services.AddScoped<IUserScoreService, UserScoreService>();
+            services.AddScoped<IImportExportService, ImportExportService>();
+            services.AddScoped<IImportManager, ImportManager>();
+            services.AddScoped<IExportManager, ExportManager>();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = appSettings.RedisConnectionString;
+            });
 
             services.AddSwaggerGen(c =>
             {   

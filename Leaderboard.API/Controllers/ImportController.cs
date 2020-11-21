@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Leaderboard.Services.ImportExport;
 using Leaderboard.Services.UserScoreService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,10 @@ namespace Leaderboard.API.Controllers
     [ApiController]
     public class ImportController : ControllerBase
     {
-        private IUserScoreService _userScoreService;
-        public ImportController(IUserScoreService userScoreService)
+        private IImportExportService _importExportService;
+        public ImportController(IImportExportService importExportService)
         {
-            _userScoreService = userScoreService;
+            _importExportService = importExportService;
         }
 
         [HttpPost]
@@ -48,7 +49,7 @@ namespace Leaderboard.API.Controllers
             }
 
 
-            _userScoreService.ImportFromExcel(filePath, scoreDate);
+            _importExportService.ImportFromExcel(filePath, scoreDate);
 
             return Ok();
         }

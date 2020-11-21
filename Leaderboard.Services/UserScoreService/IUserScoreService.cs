@@ -6,6 +6,6 @@ namespace Leaderboard.Services.UserScoreService
 {
     public interface IUserScoreService
     {
-        void ImportFromExcel(string path, DateTime scoreDate);
+        
     }
 }

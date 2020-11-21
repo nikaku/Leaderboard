@@ -8,5 +8,6 @@
         public string SqlServerUser { get; set; }
         public string SqlServerPassword { get; set; }
         public bool EnableSSL { get; set; }
+        public string RedisConnectionString { get; set; }
     }
 }

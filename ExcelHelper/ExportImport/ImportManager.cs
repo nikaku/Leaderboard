@@ -4,9 +4,9 @@ using System.Data.OleDb;
 using System.IO;
 using System.Linq;
 
-namespace ExcelHelper
+namespace ExcelHelper.ExportImport
 {
-    public class ExcelImport
+    public class ImportManager : IImportManager
     {
         public DataTable ReadExcelFile(string sheetName, string path)
         {
@@ -33,7 +33,6 @@ namespace ExcelHelper
                         da.Fill(dt);
                         return dt;
                     }
-
                 }
             }
         }
