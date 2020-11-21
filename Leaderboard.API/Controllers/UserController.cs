@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Leaderboard.BL.Dtos.UserDtos;
+﻿using Leaderboard.BL.Dtos.UserDtos;
 using Leaderboard.BL.Interfaces;
 using Leaderboard.Services.UserServices;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Leaderboard.API.Controllers
 {

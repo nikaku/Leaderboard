@@ -1,4 +1,6 @@
 using ExcelHelper.ExportImport;
+using Leaderboard.BL.Caching;
+using Leaderboard.BL.Configuration;
 using Leaderboard.BL.Interfaces;
 using Leaderboard.BL.Interfaces.Repositories;
 using Leaderboard.DB.Implementations;
@@ -38,6 +40,7 @@ namespace Leaderboard.API
 
             var connection = $"Server=tcp:{appSettings.SqlServerHostName},{appSettings.SqlServerPort};Initial Catalog={appSettings.SqlServerCatalog};Persist Security Info=False;User ID={appSettings.SqlServerUser};Password={appSettings.SqlServerPassword};MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;";
 
+            services.AddSingleton(appSettings);
             services.AddTransient<IDbConnection>((sp) => new SqlConnection(connection));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -48,6 +51,8 @@ namespace Leaderboard.API
             services.AddScoped<IImportExportService, ImportExportService>();
             services.AddScoped<IImportManager, ImportManager>();
             services.AddScoped<IExportManager, ExportManager>();
+            services.AddScoped<IStaticCacheManager, RedisCacheManager>();
+
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = appSettings.RedisConnectionString;

@@ -1,4 +1,5 @@
-﻿using Leaderboard.BL.Dtos.LeaderboardDto;
+﻿using Leaderboard.BL.Caching;
+using Leaderboard.BL.Dtos.LeaderboardDto;
 using Leaderboard.BL.Dtos.UserDtos;
 using Leaderboard.BL.Entities;
 using Leaderboard.BL.Interfaces;
@@ -12,10 +13,12 @@ namespace Leaderboard.Services.LeaderboardServices
     public class LeaderboardService : ILeaderboardService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private IStaticCacheManager _redisCacheManager;
 
-        public LeaderboardService(IUnitOfWork unitOfWork)
+        public LeaderboardService(IUnitOfWork unitOfWork, IStaticCacheManager staticCacheManager)
         {
             _unitOfWork = unitOfWork;
+            _redisCacheManager = staticCacheManager;
         }
 
         public IEnumerable<LeaderboardDto> GetLeaderboardByDay(DateTime day)
@@ -56,6 +59,13 @@ namespace Leaderboard.Services.LeaderboardServices
 
         public Stats GetStats()
         {
+            CacheKey cacheKey = new CacheKey("GetStats");
+            var statsInCache = _redisCacheManager.Get<Stats>(cacheKey);
+            if (statsInCache != null)
+            {
+                return statsInCache;
+            }
+
             var dailyAvg = _unitOfWork.UserScoreRepository.GetDalyAvarage();
             var weeklyAvg = _unitOfWork.UserScoreRepository.GetWeeklyAvarage();
             var monthlyAvg = _unitOfWork.UserScoreRepository.GetMonthlyAvarage();

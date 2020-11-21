@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Leaderboard.BL.Caching;
+using Leaderboard.BL.Dtos.LeaderboardDto;
 using Leaderboard.BL.Interfaces;
 using Leaderboard.Services.LeaderboardServices;
 using Microsoft.AspNetCore.Http;
@@ -13,7 +15,7 @@ namespace Leaderboard.API.Controllers
     [ApiController]
     public class LeaderboardController : ControllerBase
     {
-        private readonly ILeaderboardService _leaderboardService;
+        private ILeaderboardService _leaderboardService;
 
         public LeaderboardController(ILeaderboardService leaderboardService)
         {
@@ -50,8 +52,8 @@ namespace Leaderboard.API.Controllers
 
         [HttpGet]
         public IActionResult GetStats()
-        {
-            var stats = _leaderboardService.GetStats();
+        {            
+            var stats = _leaderboardService.GetStats();        
             return Ok(stats);
         }
 
