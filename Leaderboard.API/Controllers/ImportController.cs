@@ -24,6 +24,11 @@ namespace Leaderboard.API.Controllers
         [HttpPost]
         public IActionResult UploadLeaderboardData(IFormFile file)
         {
+            if (file == null)
+            {
+                return BadRequest("Please Select File");
+            }
+
             var fileExtension = file.FileName.Split(".")[1];
             var fileDate = file.FileName.Split(".")[0];
             DateTime scoreDate = DateTime.MinValue;
@@ -31,7 +36,7 @@ namespace Leaderboard.API.Controllers
                 !fileExtension.EndsWith(".xls") &&
                 !DateTime.TryParse(fileDate, out scoreDate))
             {
-                return BadRequest();
+                return BadRequest("File Format Should Be \".xlsx\" Or \".xls\" And Date Fromat MM-dd-yyyy");
             }
 
             string path = Path.Combine(Path.GetTempPath(), "ImportedExcelFiles");
@@ -47,7 +52,6 @@ namespace Leaderboard.API.Controllers
             {
                 file.CopyTo(stream);
             }
-
 
             _importExportService.ImportFromExcel(filePath, scoreDate);
 

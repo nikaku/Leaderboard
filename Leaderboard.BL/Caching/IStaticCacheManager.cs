@@ -7,7 +7,10 @@ namespace Leaderboard.BL.Caching
 {
     public interface IStaticCacheManager
     {
-        void Set(string key, object data, int cacheTime);
+        void Set(CacheKey key, object data);
         T Get<T>(CacheKey key);
+        void ClearCache();
+        void ClearCache(string pattern, IEnumerable<string> items);
+        void ClearCache(string patern);
     }
 }

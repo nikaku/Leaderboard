@@ -1,9 +1,8 @@
 ﻿using Dapper;
 using Leaderboard.BL.Dtos.LeaderboardDto;
-using Leaderboard.BL.Entities;
+using Leaderboard.BL.Interfaces;
 using Leaderboard.BL.Interfaces.Repositories;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -12,12 +11,12 @@ namespace Leaderboard.DB.Implementations.Repositories
 {
     public class UserScoreRepository : IUserScoreRepository
     {
-        private IDbConnection _dbConnection;
         private IUserRepository _userRepository;
-        public UserScoreRepository(IDbConnection dbConnection, IUserRepository userRepository)
+        private IUnitOfWork _unitOfWork;
+        public UserScoreRepository(IUserRepository userRepository, IUnitOfWork unitOfWork)
         {
-            _dbConnection = dbConnection;
             _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
         }
         public IEnumerable<LeaderboardDto> GetScoresByDay(DateTime date)
         {
@@ -25,7 +24,7 @@ namespace Leaderboard.DB.Implementations.Repositories
                 $" FROM UserScores " +
                 $" INNER JOIN Users ON Users.Id = UserScores.UserId" +
                 $" Where ScoreDate = @ScoreDate";
-            IEnumerable<LeaderboardDto> records = _dbConnection.Query<LeaderboardDto>(sql, new { ScoreDate = date });
+            IEnumerable<LeaderboardDto> records = _unitOfWork.Connection.Query<LeaderboardDto>(sql, new { ScoreDate = date });
             return records;
         }
 
@@ -35,7 +34,7 @@ namespace Leaderboard.DB.Implementations.Repositories
                 $" FROM UserScores " +
                 $" INNER JOIN Users ON Users.Id = UserScores.UserId" +
                 $" Where (DATEPART(week, ScoreDate) = DATEPART(week, @date) AND DATEPART(year, ScoreDate) = DATEPART(year, @date))";
-            IEnumerable<LeaderboardDto> records = _dbConnection.Query<LeaderboardDto>(sql, new { date });
+            IEnumerable<LeaderboardDto> records = _unitOfWork.Connection.Query<LeaderboardDto>(sql, new { date });
             return records;
         }
 
@@ -46,7 +45,7 @@ namespace Leaderboard.DB.Implementations.Repositories
                  $" INNER JOIN Users ON Users.Id = UserScores.UserId" +
                  $" Where DATEPART(month, ScoreDate) = DATEPART(month, @date)" +
                  $" AND DATEPART(year, ScoreDate) = DATEPART(year, @date)";
-            IEnumerable<LeaderboardDto> records = _dbConnection.Query<LeaderboardDto>(sql, new { date });
+            IEnumerable<LeaderboardDto> records = _unitOfWork.Connection.Query<LeaderboardDto>(sql, new { date });
             return records;
         }
 
@@ -55,14 +54,14 @@ namespace Leaderboard.DB.Implementations.Repositories
             string sql = $"SELECT Users.Username, UserScores.UserId, UserScores.CreateDate, UserScores.UpdateDate, UserScores.Score" +
                  $" FROM UserScores " +
                  $" INNER JOIN Users ON Users.Id = UserScores.UserId";
-            IEnumerable<LeaderboardDto> records = _dbConnection.Query<LeaderboardDto>(sql);
+            IEnumerable<LeaderboardDto> records = _unitOfWork.Connection.Query<LeaderboardDto>(sql);
             return records;
         }
 
         public int GetDalyAvarage()
         {
             string sql = $"SELECT AVG(Score) FROM UserScores";
-            int avgScore = _dbConnection.Query<int>(sql).FirstOrDefault();
+            int avgScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return avgScore;
         }
 
@@ -72,7 +71,7 @@ namespace Leaderboard.DB.Implementations.Repositories
                 $"FROM (SELECT DATEPART(week, ScoreDate) [Week], SUM(Score)[Score]" +
                 $"    FROM UserScores" +
                 $"    GROUP BY DATEPART(week, ScoreDate)) weeklySum";
-            int avgScore = _dbConnection.Query<int>(sql).FirstOrDefault();
+            int avgScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return avgScore;
         }
 
@@ -82,14 +81,14 @@ namespace Leaderboard.DB.Implementations.Repositories
                $"FROM (SELECT DATEPART(month, ScoreDate) [Month], SUM(Score)[Score]" +
                $"    FROM UserScores" +
                $"    GROUP BY DATEPART(month, ScoreDate)) weeklySum";
-            int avgScore = _dbConnection.Query<int>(sql).FirstOrDefault();
+            int avgScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return avgScore;
         }
 
         public int GetDalyMax()
         {
             string sql = $"SELECT MAX(Score) FROM UserScores";
-            int maxScore = _dbConnection.Query<int>(sql).FirstOrDefault();
+            int maxScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return maxScore;
         }
 
@@ -99,7 +98,7 @@ namespace Leaderboard.DB.Implementations.Repositories
                 $"FROM (SELECT DATEPART(week, ScoreDate) [Week], SUM(Score)[Score]" +
                 $"    FROM UserScores" +
                 $"    GROUP BY DATEPART(week, ScoreDate)) weeklySum";
-            int maxScore = _dbConnection.Query<int>(sql).FirstOrDefault();
+            int maxScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return maxScore;
         }
 
@@ -109,11 +108,11 @@ namespace Leaderboard.DB.Implementations.Repositories
                $"FROM (SELECT DATEPART(month, ScoreDate) [Month], SUM(Score)[Score]" +
                $"    FROM UserScores" +
                $"    GROUP BY DATEPART(month, ScoreDate)) weeklySum";
-            int maxScore = _dbConnection.Query<int>(sql).FirstOrDefault();
+            int maxScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return maxScore;
         }
 
-        public void Add(LeaderboardDto leaderboardDto, DateTime scoreDate)
+        public void AddOrUpdate(LeaderboardDto leaderboardDto, DateTime scoreDate)
         {
             string sql = string.Empty;
             var user = _userRepository.GetByUsername(leaderboardDto.Username);
@@ -131,7 +130,7 @@ namespace Leaderboard.DB.Implementations.Repositories
                          ROLLBACK TRANSACTION
                          END CATCH";
 
-                _dbConnection.Query<int>(sql,
+                _unitOfWork.Connection.Query<int>(sql,
                     new
                     {
                         Username = leaderboardDto.Username,
@@ -143,17 +142,43 @@ namespace Leaderboard.DB.Implementations.Repositories
             }
             else
             {
-                sql = "INSERT INTO UserScores(UserId, Score, ScoreDate, CreateDate) VALUES(@id, @Score, @ScoreDate, @CreateDate)";
-                _dbConnection.Query<int>(sql,
-                    new
-                    {
-                        id = user.Id,
-                        Score = leaderboardDto.Score,
-                        ScoreDate = scoreDate,
-                        CreateDate = DateTime.Now
-                    }
-                ).FirstOrDefault();
+                bool updateFlag = GetByDate(scoreDate, user.Id);
+                if (updateFlag)
+                {
+
+                    sql = "UPDATE UserScores Set Score = @Score, UpdateDate = @UpdateDate WHERE UserId = @UserId";
+                    _unitOfWork.Connection.Query<int>(sql,
+                        new
+                        {
+                            UserId = user.Id,
+                            Score = leaderboardDto.Score,
+                            Updatedate = DateTime.Now
+                        }
+                    ).FirstOrDefault();
+                }
+                else
+                {
+                    sql = "INSERT INTO UserScores(UserId, Score, ScoreDate, CreateDate) VALUES(@id, @Score, @ScoreDate, @CreateDate)";
+                    _unitOfWork.Connection.Query<int>(sql,
+                        new
+                        {
+                            id = user.Id,
+                            Score = leaderboardDto.Score,
+                            ScoreDate = scoreDate,
+                            CreateDate = DateTime.Now
+                        }
+                    ).FirstOrDefault();
+                }
             }
+        }
+
+        public bool GetByDate(DateTime date, int userId)
+        {
+            string sql = $"SELECT CASE WHEN EXISTS (" +
+                $"SELECT * FROM UserScores WHERE ScoreDate = '{date:s}' AND UserID = {userId})" +
+                $"THEN CAST(1 AS BIT)" +
+                $"ELSE CAST(0 AS BIT) END";
+            return _unitOfWork.Connection.Query<bool>(sql).First();
         }
     }
 }

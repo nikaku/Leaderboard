@@ -1,6 +1,8 @@
 ﻿using ExcelHelper.ExportImport;
+using Leaderboard.BL.Caching;
 using Leaderboard.BL.Dtos.LeaderboardDto;
 using Leaderboard.BL.Interfaces;
+using Leaderboard.BL.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,12 +17,20 @@ namespace Leaderboard.Services.ImportExport
         private IUnitOfWork _unitOfWork;
         private IImportManager _importManager;
         private IExportManager _exportManager;
+        private IStaticCacheManager _redisCacheManager;
+        private IUserScoreRepository _userScoreRepository;
 
-        public ImportExportService(IUnitOfWork unitOfWork, IImportManager _importManager, IExportManager exportManager)
+        public ImportExportService(IUnitOfWork unitOfWork,
+            IImportManager importManager,
+            IExportManager exportManager,
+            IStaticCacheManager staticCacheManager,
+            IUserScoreRepository userScoreRepository)
         {
             _unitOfWork = unitOfWork;
-            this._importManager = _importManager;
+            _importManager = importManager;
             _exportManager = exportManager;
+            _redisCacheManager = staticCacheManager;
+            _userScoreRepository = userScoreRepository;
         }
 
 
@@ -34,7 +44,6 @@ namespace Leaderboard.Services.ImportExport
         {
             var sheetNames = _importManager.ToExcelsSheetList(path);
             var userScoreDt = _importManager.ReadExcelFile(sheetNames.First(), path);
-
             var userScores = new List<LeaderboardDto>();
 
             foreach (DataRow row in userScoreDt.Rows)
@@ -48,8 +57,10 @@ namespace Leaderboard.Services.ImportExport
 
             foreach (var userScore in userScores)
             {
-                _unitOfWork.UserScoreRepository.Add(userScore, scoreDate);
+                _userScoreRepository.AddOrUpdate(userScore, scoreDate);
             }
+
+            _redisCacheManager.ClearCache(Defaults.UserInfoPattern, userScores.Select(u => u.Username));
         }
     }
 

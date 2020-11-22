@@ -1,9 +1,9 @@
-﻿IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'DapperTest')
+﻿IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'LeaderBoard')
   BEGIN
-    CREATE DATABASE DapperTest
+    CREATE DATABASE LeaderBoard
   END
   ------------------------------------------------------------------
-USE [DapperTest]
+USE [LeaderBoard]
 GO
 /****** Object:  Table [dbo].[Users]    Script Date: 11/18/2020 6:00:04 PM ******/
 SET ANSI_NULLS ON
@@ -29,6 +29,8 @@ CREATE TABLE [dbo].[UserScores](
 	[UserId] [int] NULL,
 	[CreateDate] [datetime2](7) NULL,
 	[UpdateDate] [datetime2](7) NULL,
+	[ScoreDate] [datetime2](7) NULL,
+	[Score] [int] NULL,
  CONSTRAINT [PK_UserScores] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

@@ -1,55 +1,66 @@
 ﻿using Leaderboard.BL.Configuration;
+using Leaderboard.BL.Interfaces;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Leaderboard.BL.Caching
 {
     public class RedisCacheManager : IStaticCacheManager
     {
         private IDatabase _db;
+        private IServer _server;
 
         public RedisCacheManager(AppSettings appSettings)
         {
+            _server = ConnectionMultiplexer.Connect($"{appSettings.RedisConnectionString},allowAdmin=true").GetServer("127.0.0.1:6379");
             _db = ConnectionMultiplexer.Connect(appSettings.RedisConnectionString).GetDatabase();
         }
 
-        public void Set(string key, object data, int cacheTime)
+        public void Set(CacheKey key, object data)
         {
             if (data == null)
                 return;
 
-            //set cache time
-            var expiresIn = TimeSpan.FromMinutes(cacheTime);
-
-            //serialize item
+            var expiresIn = TimeSpan.FromMinutes(key.CacheTime);
             var serializedItem = JsonConvert.SerializeObject(data);
-
-            //and set it to cache
-            _db.StringSetAsync(key, serializedItem, expiresIn);
+            _db.StringSetAsync(key.Key, serializedItem, expiresIn);
         }
 
-        public virtual T Get<T>(CacheKey key)
+        public T Get<T>(CacheKey key)
         {
-            //get serialized item from cache
             var serializedItem = _db.StringGet(key.Key);
             if (!serializedItem.HasValue)
                 return default;
 
-            //deserialize item
             var item = JsonConvert.DeserializeObject<T>(serializedItem);
             if (item == null)
                 return default;
 
             return item;
-
         }
 
-        public virtual T Get<T>(CacheKey key, Func<T> acquire)
+        public void ClearCache()
         {
-            var result = acquire();
-            return result;
+            _server.FlushDatabase();
+        }
+
+        public void ClearCache(string pattern, IEnumerable<string> items)
+        {
+            List<RedisKey> keys = new List<RedisKey>();
+            foreach (var item in items)
+            {
+                keys.Add(new RedisKey($"{pattern}-{item}"));
+            }
+            _db.KeyDeleteAsync(keys.ToArray());
+        }
+
+        public void ClearCache(string pattern)
+        {
+            RedisKey[] keys = _server.Keys(pattern: pattern + "*").ToArray();
+            _db.KeyDeleteAsync(keys);
         }
     }
 }

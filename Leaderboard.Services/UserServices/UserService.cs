@@ -1,56 +1,53 @@
 ﻿using Leaderboard.BL.Dtos.UserDtos;
 using Leaderboard.BL.Entities;
 using Leaderboard.BL.Interfaces;
-using System;
+using Leaderboard.BL.Interfaces.Repositories;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Leaderboard.Services.UserServices
 {
     public class UserService : IUserService
     {
-        private readonly IUnitOfWork _unitOfWork;
-
-        public UserService(IUnitOfWork unitOfWork)
+        private IUserRepository _userScoreRepository;
+        public UserService(IUserRepository userScoreRepository)
         {
-            _unitOfWork = unitOfWork;
+            _userScoreRepository = userScoreRepository;
         }
 
         public int Create(CreateUserDto createUserDto)
         {
-            return _unitOfWork.UserRepository.Add(new User { Username = createUserDto.Username });
+            return _userScoreRepository.Add(new User { Username = createUserDto.Username });
         }
 
         public void Delete(int id)
         {
-            _unitOfWork.UserRepository.Delete(id);
+            _userScoreRepository.Delete(id);
         }
 
         public User Get(int id)
         {
-            return _unitOfWork.UserRepository.Get(id);
+            return _userScoreRepository.Get(id);
         }
 
         public IEnumerable<User> GetAll()
         {
-            return _unitOfWork.UserRepository.GetAll();
+            return _userScoreRepository.GetAll();
         }
 
         public User GetUserInfo(string username)
         {
-            return _unitOfWork.UserRepository.GetByUsername(username);
+            return _userScoreRepository.GetByUsername(username);
         }
 
         public User GetByUsername(string username)
         {
-            return _unitOfWork.UserRepository.GetByUsername(username);
+            return _userScoreRepository.GetByUsername(username);
         }
 
 
         public bool Update(User entity)
         {
-            return _unitOfWork.UserRepository.Update(entity);
+            return _userScoreRepository.Update(entity);
         }
     }
 }
