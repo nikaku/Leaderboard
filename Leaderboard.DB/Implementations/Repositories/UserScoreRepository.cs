@@ -85,7 +85,7 @@ namespace Leaderboard.DB.Implementations.Repositories
             return avgScore;
         }
 
-        public int GetDalyMax()
+        public int GetDaiyMax()
         {
             string sql = $"SELECT MAX(Score) FROM UserScores";
             int maxScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();

@@ -10,7 +10,7 @@ namespace Leaderboard.BL.Caching
         public static string UserInfoPattern => "Leaderboard.UserInfo";
         public static string LeaderboardByMonthPattern => "Leaderboard.LeaderboardByMonth";
         public static string LeaderboardByWeekPattern => "Leaderboard.LeaderboardByWeek";
-        public static string LeaderboardByDaysPattern => "Leaderboard.LeaderboardByDays";
+        public static string LeaderboardByDayPattern => "Leaderboard.LeaderboardByDay";
         public static string AllDataPattern => "Leaderboard.AllData";
     }
 }

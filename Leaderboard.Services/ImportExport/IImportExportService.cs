@@ -8,6 +8,7 @@ namespace Leaderboard.Services.ImportExport
     public interface IImportExportService
     {
         void ImportFromExcel(string path, DateTime scoreDate);
-        byte[] ExportToExcel(IEnumerable<LeaderboardDto> leaderboardDtos);
+        void ExportToExcel<T>(IEnumerable<T> collection, string path);
+        void ExportToExcel<T>(T item, string path);
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Leaderboard.BL.Caching;
 using Leaderboard.BL.Dtos.LeaderboardDto;
+using Leaderboard.BL.Dtos.UserDtos;
 using Leaderboard.BL.Interfaces;
 using Leaderboard.Services.LeaderboardServices;
 using Microsoft.AspNetCore.Http;
@@ -52,15 +53,24 @@ namespace Leaderboard.API.Controllers
 
         [HttpGet]
         public IActionResult GetStats()
-        {            
-            var stats = _leaderboardService.GetStats();        
+        {
+            var stats = _leaderboardService.GetStats();
             return Ok(stats);
         }
 
         [HttpGet]
         public IActionResult GetUserInfo(string username)
         {
-            var stats = _leaderboardService.GetUserInfo(username);
+            UserRating stats;
+            try
+            {
+                stats = _leaderboardService.GetUserInfo(username);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
             return Ok(stats);
         }
     }

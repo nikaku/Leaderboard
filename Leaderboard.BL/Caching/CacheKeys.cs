@@ -10,7 +10,7 @@ namespace Leaderboard.BL.Caching
         public static CacheKey UserInfoCacheKey => new CacheKey(Defaults.UserInfoPattern);
         public static CacheKey LeaderboardByMonthCacheKey => new CacheKey(Defaults.LeaderboardByMonthPattern);
         public static CacheKey LeaderboardByWeekCacheKey => new CacheKey(Defaults.LeaderboardByWeekPattern);
-        public static CacheKey LeaderboardByDayCacheKey => new CacheKey(Defaults.AllDataPattern);
+        public static CacheKey LeaderboardByDayCacheKey => new CacheKey(Defaults.LeaderboardByDayPattern);
         public static CacheKey AllDataCacheKey => new CacheKey(Defaults.AllDataPattern);
     }
 }

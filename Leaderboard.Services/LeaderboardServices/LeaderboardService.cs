@@ -20,77 +20,107 @@ namespace Leaderboard.Services.LeaderboardServices
             _redisCacheManager = staticCacheManager;
         }
 
-        public IEnumerable<LeaderboardDto> GetLeaderboardByDay(DateTime day)
+        public IEnumerable<LeaderboardDto> GetLeaderboardByDay(DateTime day, bool ignoreCache)
         {
-            CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByDayCacheKey);
-            var LeaderboardByDay = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
-
-            if (LeaderboardByDay != null)
+            if (ignoreCache)
             {
-                return LeaderboardByDay;
+                return _userScoreRepository.GetScoresByDay(day).OrderByDescending(s => s.Score);
             }
+            else
+            {
+                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByDayCacheKey);
+                var LeaderboardByDay = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
 
-            var dailyScores = _userScoreRepository.GetScoresByDay(day);
-            var dailyScoresOrdered = dailyScores.OrderByDescending(s => s.Score);
-            _redisCacheManager.Set(cacheKey, dailyScoresOrdered);
+                if (LeaderboardByDay != null)
+                {
+                    return LeaderboardByDay;
+                }
 
-            return dailyScoresOrdered;
+                var dailyScores = _userScoreRepository.GetScoresByDay(day);
+                var dailyScoresOrdered = dailyScores.OrderByDescending(s => s.Score);
+
+                _redisCacheManager.Set(cacheKey, dailyScoresOrdered);
+                return dailyScoresOrdered;
+            }
         }
 
-        public IEnumerable<LeaderboardDto> GetLeaderboardByWeek(DateTime week)
+        public IEnumerable<LeaderboardDto> GetLeaderboardByWeek(DateTime week, bool ignoreCache)
         {
-            CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByWeekCacheKey);
-
-            var LeaderboardByWeek = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
-
-            if (LeaderboardByWeek != null)
+            if (ignoreCache)
             {
-                return LeaderboardByWeek;
+                return _userScoreRepository.GetScoresByWeek(week).OrderByDescending(s => s.Score);
             }
-
-            var weeklyScores = _userScoreRepository.GetScoresByWeek(week);
-            weeklyScores = weeklyScores.GroupBy(u => u.Username).Select(x =>
-            new LeaderboardDto
+            else
             {
-                Username = x.First().Username,
-                Score = x.Sum(x => x.Score)
-            });
+                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByWeekCacheKey);
+                var LeaderboardByWeek = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
 
-            var weeklyScoresOrdered = weeklyScores.OrderByDescending(s => s.Score);
-            _redisCacheManager.Set(cacheKey, weeklyScoresOrdered);
+                if (LeaderboardByWeek != null)
+                {
+                    return LeaderboardByWeek;
+                }
 
-            return weeklyScoresOrdered;
+                var weeklyScores = _userScoreRepository.GetScoresByWeek(week);
+                if (weeklyScores.Count() == 0)
+                {
+                    return default;
+                }
+                weeklyScores = weeklyScores.GroupBy(u => u.Username).Select(x =>
+                new LeaderboardDto
+                {
+                    Username = x.First().Username,
+                    Score = x.Sum(x => x.Score)
+                });
+
+                var weeklyScoresOrdered = weeklyScores.OrderByDescending(s => s.Score);
+                _redisCacheManager.Set(cacheKey, weeklyScoresOrdered);
+
+                return weeklyScoresOrdered;
+            }
         }
 
-        public IEnumerable<LeaderboardDto> GetLeaderboardByMonth(DateTime month)
+        public IEnumerable<LeaderboardDto> GetLeaderboardByMonth(DateTime month, bool ignoreCache)
         {
-            CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByMonthCacheKey);
-
-            var LeaderboardByMonth = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
-
-            if (LeaderboardByMonth != null)
+            if (ignoreCache)
             {
-                return LeaderboardByMonth;
+                return _userScoreRepository.GetScoresByMonth(month).OrderByDescending(s => s.Score);
             }
-
-            var monthlyScores = _userScoreRepository.GetScoresByMonth(month);
-            monthlyScores = monthlyScores.GroupBy(u => u.Username).Select(x =>
-            new LeaderboardDto
+            else
             {
-                Username = x.First().Username,
-                Score = x.Sum(x => x.Score)
-            });
+                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByMonthCacheKey);
+                var LeaderboardByMonth = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
 
-            var monthlyScoresOrdered = monthlyScores.OrderByDescending(s => s.Score);
-            _redisCacheManager.Set(cacheKey, monthlyScoresOrdered);
+                if (LeaderboardByMonth != null)
+                {
+                    return LeaderboardByMonth;
+                }
 
-            return monthlyScoresOrdered;
+                var monthlyScores = _userScoreRepository.GetScoresByMonth(month);
+                if (monthlyScores.Count() == 0)
+                {
+                    return default;
+                }
+                monthlyScores = monthlyScores.GroupBy(u => u.Username).Select(x =>
+                new LeaderboardDto
+                {
+                    Username = x.First().Username,
+                    Score = x.Sum(x => x.Score)
+                });
+
+                var monthlyScoresOrdered = monthlyScores.OrderByDescending(s => s.Score);
+                _redisCacheManager.Set(cacheKey, monthlyScoresOrdered);
+
+                return monthlyScoresOrdered;
+            }
         }
 
-        public IEnumerable<LeaderboardDto> GetAllData()
+        public IEnumerable<LeaderboardDto> GetAllData(bool ignoreCache)
         {
+            if (ignoreCache)
+            {
+                return _userScoreRepository.GetAllData();
+            }
             CacheKey cacheKey = new CacheKey(CacheKeys.AllDataCacheKey);
-
             var allDataInCache = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
 
             if (allDataInCache != null)
@@ -104,35 +134,43 @@ namespace Leaderboard.Services.LeaderboardServices
             return _userScoreRepository.GetAllData();
         }
 
-        public Stats GetStats()
+        public Stats GetStats(bool ignoreCache)
         {
-            CacheKey cacheKey = new CacheKey(CacheKeys.StatsCacheKey);
-            var statsInCache = _redisCacheManager.Get<Stats>(cacheKey);
-
-            if (statsInCache != null)
+            if (ignoreCache)
             {
-                return statsInCache;
+                return new Stats
+                {
+                    DailyAvarage = _userScoreRepository.GetDalyAvarage(),
+                    WeeklyAvarage = _userScoreRepository.GetWeeklyAvarage(),
+                    MonthlyAvarage = _userScoreRepository.GetMonthlyAvarage(),
+                    DailyMax = _userScoreRepository.GetDaiyMax(),
+                    WeeklyMax = _userScoreRepository.GetWeeklyMax(),
+                    MonthlyMax = _userScoreRepository.GetMonthlyMax()
+                };
             }
-
-            var dailyAvg = _userScoreRepository.GetDalyAvarage();
-            var weeklyAvg = _userScoreRepository.GetWeeklyAvarage();
-            var monthlyAvg = _userScoreRepository.GetMonthlyAvarage();
-            var dailyMax = _userScoreRepository.GetDalyMax();
-            var weeklyMax = _userScoreRepository.GetWeeklyMax();
-            var monthlyMax = _userScoreRepository.GetMonthlyMax();
-
-            Stats stats = new Stats
+            else
             {
-                DailyAvarage = dailyAvg,
-                WeeklyAvarage = weeklyAvg,
-                MonthlyAvarage = monthlyAvg,
-                DailyMax = dailyMax,
-                WeeklyMax = weeklyMax,
-                MonthlyMax = monthlyMax
-            };
+                CacheKey cacheKey = new CacheKey(CacheKeys.StatsCacheKey);
+                var statsInCache = _redisCacheManager.Get<Stats>(cacheKey);
 
-            _redisCacheManager.Set(cacheKey, stats);
-            return stats;
+                if (statsInCache != null)
+                {
+                    return statsInCache;
+                }
+
+                Stats stats = new Stats
+                {
+                    DailyAvarage = _userScoreRepository.GetDalyAvarage(),
+                    WeeklyAvarage = _userScoreRepository.GetWeeklyAvarage(),
+                    MonthlyAvarage = _userScoreRepository.GetMonthlyAvarage(),
+                    DailyMax = _userScoreRepository.GetDaiyMax(),
+                    WeeklyMax = _userScoreRepository.GetWeeklyMax(),
+                    MonthlyMax = _userScoreRepository.GetMonthlyMax()
+                };
+
+                _redisCacheManager.Set(cacheKey, stats);
+                return stats;
+            }
         }
 
         public UserRating GetUserInfo(string username)
@@ -154,16 +192,12 @@ namespace Leaderboard.Services.LeaderboardServices
                          Score = x.Sum(x => x.Score)
                      }).OrderByDescending(s => s.Score);
 
-            if (currentMonthScores.Count() == 0)
-            {
-                throw new Exception("Scores Doesnot Exists");
-            }
 
             var userRatingIndex = currentMonthScores.Select((Value, Index) => new { Value, Index }).SingleOrDefault(p => p.Value.Username == username);
 
             if (userRatingIndex == null)
             {
-                throw new Exception("User Dont Have Scores");
+                throw new Exception("User Dont Have Scores Or Doesnot Exists");
             }
 
             var userRating = new UserRating

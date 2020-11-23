@@ -13,31 +13,31 @@ namespace Leaderboard.Services.ImportExport
 {
     public class ImportExportService : IImportExportService
     {
-
-        private IUnitOfWork _unitOfWork;
         private IImportManager _importManager;
         private IExportManager _exportManager;
         private IStaticCacheManager _redisCacheManager;
         private IUserScoreRepository _userScoreRepository;
 
-        public ImportExportService(IUnitOfWork unitOfWork,
+        public ImportExportService(
             IImportManager importManager,
             IExportManager exportManager,
             IStaticCacheManager staticCacheManager,
             IUserScoreRepository userScoreRepository)
         {
-            _unitOfWork = unitOfWork;
             _importManager = importManager;
             _exportManager = exportManager;
             _redisCacheManager = staticCacheManager;
             _userScoreRepository = userScoreRepository;
         }
 
-
-        public byte[] ExportToExcel(IEnumerable<LeaderboardDto> leaderboardDtos)
+        public void ExportToExcel<T>(IEnumerable<T> items, string path)
         {
-            _exportManager.ExportToExcel(leaderboardDtos);
-            return new byte[] { };
+            _exportManager.ExportToExcel(items, path);
+        }
+
+        public void ExportToExcel<T>(T model, string path)
+        {
+            _exportManager.ExportToExcel(model, path);
         }
 
         public void ImportFromExcel(string path, DateTime scoreDate)

@@ -14,7 +14,7 @@ namespace Leaderboard.BL.Interfaces.Repositories
         int GetDalyAvarage();
         int GetWeeklyAvarage();
         int GetMonthlyAvarage();
-        int GetDalyMax();
+        int GetDaiyMax();
         int GetWeeklyMax();
         int GetMonthlyMax();
         void AddOrUpdate(LeaderboardDto leaderboardDto, DateTime scoreDate);
