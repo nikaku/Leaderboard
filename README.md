@@ -13,6 +13,8 @@
 ### Prerequisites
 
 1. Install [AccessDatabaseEngine](https://download.microsoft.com/download/2/4/3/24375141-E08D-4803-AB0E-10F2E3A07AAA/AccessDatabaseEngine_X64.exe)
+2. Install [Redis 2.4.5 For Windows](https://github.com/downloads/dmajkic/redis/redis-2.4.5-win32-win64.zip)
+
 2. Create Database
    ```sql
    IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'LeaderBoard')
