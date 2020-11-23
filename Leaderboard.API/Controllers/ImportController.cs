@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Leaderboard.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class ImportController : ControllerBase
     {

@@ -2,10 +2,8 @@
   BEGIN
     CREATE DATABASE LeaderBoard
   END
-  ------------------------------------------------------------------
 USE [LeaderBoard]
 GO
-/****** Object:  Table [dbo].[Users]    Script Date: 11/18/2020 6:00:04 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON

@@ -5,16 +5,17 @@ using Leaderboard.BL.Interfaces;
 using Leaderboard.BL.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Leaderboard.Services.LeaderboardServices
 {
     public class LeaderboardService : ILeaderboardService
     {
-        private IStaticCacheManager _redisCacheManager;
+        private ICacheManager _redisCacheManager;
         private IUserScoreRepository _userScoreRepository;
 
-        public LeaderboardService(IUserScoreRepository userScoreRepository, IStaticCacheManager staticCacheManager)
+        public LeaderboardService(IUserScoreRepository userScoreRepository, ICacheManager staticCacheManager)
         {
             _userScoreRepository = userScoreRepository;
             _redisCacheManager = staticCacheManager;
@@ -28,15 +29,21 @@ namespace Leaderboard.Services.LeaderboardServices
             }
             else
             {
-                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByDayCacheKey);
+                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByDayCacheKey, day.ToString("MM-dd-yyyy"));
                 var LeaderboardByDay = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
 
                 if (LeaderboardByDay != null)
                 {
-                    return LeaderboardByDay;
+                    return default;
                 }
 
                 var dailyScores = _userScoreRepository.GetScoresByDay(day);
+
+                if (dailyScores.Count() == 0)
+                {
+                    return dailyScores;
+                }
+
                 var dailyScoresOrdered = dailyScores.OrderByDescending(s => s.Score);
 
                 _redisCacheManager.Set(cacheKey, dailyScoresOrdered);
@@ -52,7 +59,11 @@ namespace Leaderboard.Services.LeaderboardServices
             }
             else
             {
-                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByWeekCacheKey);
+                var weekNo = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(week,
+                CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule,
+                CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+
+                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByWeekCacheKey, $"{weekNo}-{week.Year}");
                 var LeaderboardByWeek = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
 
                 if (LeaderboardByWeek != null)
@@ -87,7 +98,7 @@ namespace Leaderboard.Services.LeaderboardServices
             }
             else
             {
-                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByMonthCacheKey);
+                CacheKey cacheKey = new CacheKey(CacheKeys.LeaderboardByMonthCacheKey, month.ToString("MM-yyyy"));
                 var LeaderboardByMonth = _redisCacheManager.Get<IEnumerable<LeaderboardDto>>(cacheKey);
 
                 if (LeaderboardByMonth != null)

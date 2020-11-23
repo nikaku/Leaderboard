@@ -51,7 +51,7 @@ namespace Leaderboard.API
             services.AddScoped<IImportExportService, ImportExportService>();
             services.AddScoped<IImportManager, ImportManager>();
             services.AddScoped<IExportManager, ExportManager>();
-            services.AddScoped<IStaticCacheManager, RedisCacheManager>();
+            services.AddScoped<ICacheManager, RedisCacheManager>();
 
             services.AddStackExchangeRedisCache(options =>
             {

@@ -3,7 +3,6 @@ using Leaderboard.Services.ImportExport;
 using Leaderboard.Services.LeaderboardServices;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Data.OleDb;
 using System.IO;
 
 namespace Leaderboard.API.Controllers
@@ -31,9 +30,9 @@ namespace Leaderboard.API.Controllers
         [HttpGet]
         public IActionResult DownloadLeaderboardByDay(DateTime date)
         {
-            string filePath = Path.Combine(_path, $"LeaderboardByDay-{DateTime.Now:yyyy-dd-MM}");
+            string filePath = Path.Combine(_path, $"LeaderboardByDay-{DateTime.Now:yyyy-dd-MM}.xlsx");
 
-            var leaderboard = _leaderboardService.GetLeaderboardByDay(date);
+            var leaderboard = _leaderboardService.GetLeaderboardByDay(date, true);
             if (leaderboard == null)
             {
                 return NotFound();
@@ -46,9 +45,9 @@ namespace Leaderboard.API.Controllers
         [HttpGet]
         public IActionResult DownloadLeaderboardByWeek(DateTime date)
         {
-            string filePath = Path.Combine(_path, $"LeaderboardByWeek-{DateTime.Now:yyyy-dd-MM}");
+            string filePath = Path.Combine(_path, $"LeaderboardByWeek-{DateTime.Now:yyyy-dd-MM}.xlsx");
 
-            var leaderboard = _leaderboardService.GetLeaderboardByWeek(date);
+            var leaderboard = _leaderboardService.GetLeaderboardByWeek(date, true);
             if (leaderboard == null)
             {
                 return NotFound();
@@ -61,9 +60,9 @@ namespace Leaderboard.API.Controllers
         [HttpGet]
         public IActionResult DownloadLeaderboardByMonth(DateTime date)
         {
-            string filePath = Path.Combine(_path, $"LeaderboardByMonth-{DateTime.Now:yyyy-dd-MM}");
+            string filePath = Path.Combine(_path, $"LeaderboardByMonth-{DateTime.Now:yyyy-dd-MM}.xlsx");
 
-            var leaderboard = _leaderboardService.GetLeaderboardByWeek(date);
+            var leaderboard = _leaderboardService.GetLeaderboardByWeek(date, true);
             if (leaderboard == null)
             {
                 return NotFound();
@@ -77,9 +76,9 @@ namespace Leaderboard.API.Controllers
         [HttpGet]
         public IActionResult DownloadAllData()
         {
-            string filePath = Path.Combine(_path, $"DownloadAllData-{DateTime.Now:yyyy-dd-MM}");
+            string filePath = Path.Combine(_path, $"DownloadAllData-{DateTime.Now:yyyy-dd-MM}.xlsx");
 
-            var leaderboard = _leaderboardService.GetAllData();
+            var leaderboard = _leaderboardService.GetAllData(true);
             if (leaderboard == null)
             {
                 return NotFound();
@@ -92,9 +91,9 @@ namespace Leaderboard.API.Controllers
         [HttpGet]
         public IActionResult DownloadStats()
         {
-            string filePath = Path.Combine(_path, $"DownloadStats-{DateTime.Now:yyyy-dd-MM}");
+            string filePath = Path.Combine(_path, $"DownloadStats-{DateTime.Now:yyyy-dd-MM}.xlsx");
 
-            var leaderboard = _leaderboardService.GetStats();
+            var leaderboard = _leaderboardService.GetStats(true);
             if (leaderboard == null)
             {
                 return NotFound();

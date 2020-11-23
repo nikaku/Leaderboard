@@ -6,6 +6,7 @@ using Leaderboard.BL.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -15,13 +16,13 @@ namespace Leaderboard.Services.ImportExport
     {
         private IImportManager _importManager;
         private IExportManager _exportManager;
-        private IStaticCacheManager _redisCacheManager;
+        private ICacheManager _redisCacheManager;
         private IUserScoreRepository _userScoreRepository;
 
         public ImportExportService(
             IImportManager importManager,
             IExportManager exportManager,
-            IStaticCacheManager staticCacheManager,
+            ICacheManager staticCacheManager,
             IUserScoreRepository userScoreRepository)
         {
             _importManager = importManager;
@@ -60,7 +61,17 @@ namespace Leaderboard.Services.ImportExport
                 _userScoreRepository.AddOrUpdate(userScore, scoreDate);
             }
 
+            var weekNo = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(scoreDate,
+                CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule,
+                CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+
+            //Delete imported Users Cache and Related statistics
             _redisCacheManager.ClearCache(Defaults.UserInfoPattern, userScores.Select(u => u.Username));
+            _redisCacheManager.ClearCache(Defaults.AllDataPattern);
+            _redisCacheManager.ClearCache(Defaults.LeaderboardByWeekPattern, $"{weekNo}-{scoreDate.Year}");
+            _redisCacheManager.ClearCache(Defaults.LeaderboardByMonthPattern, scoreDate.ToString("MM-yyyy"));
+            _redisCacheManager.ClearCache(Defaults.StatsPattern);
+
         }
     }
 

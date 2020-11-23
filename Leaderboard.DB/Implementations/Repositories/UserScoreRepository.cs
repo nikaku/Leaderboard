@@ -60,7 +60,7 @@ namespace Leaderboard.DB.Implementations.Repositories
 
         public int GetDalyAvarage()
         {
-            string sql = $"SELECT AVG(Score) FROM UserScores";
+            string sql = $"SELECT SUM(Score)/COUNT(distinct(ScoreDate)) FROM UserScores";
             int avgScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return avgScore;
         }
@@ -70,17 +70,17 @@ namespace Leaderboard.DB.Implementations.Repositories
             string sql = $"SELECT AVG(Score) [WeeklyAvarage] " +
                 $"FROM (SELECT DATEPART(week, ScoreDate) [Week], SUM(Score)[Score]" +
                 $"    FROM UserScores" +
-                $"    GROUP BY DATEPART(week, ScoreDate)) weeklySum";
+                $"    GROUP BY DATEPART(week, ScoreDate), DATEPART(year,ScoreDate)) weeklySum";
             int avgScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return avgScore;
         }
 
         public int GetMonthlyAvarage()
         {
-            string sql = $"SELECT AVG(Score) [WeeklyAvarage] " +
+            string sql = $"SELECT AVG(Score) [MonthlyAvarage] " +
                $"FROM (SELECT DATEPART(month, ScoreDate) [Month], SUM(Score)[Score]" +
                $"    FROM UserScores" +
-               $"    GROUP BY DATEPART(month, ScoreDate)) weeklySum";
+               $"    GROUP BY DATEPART(month, ScoreDate), DATEPART(year,ScoreDate)) monthlyAvarage";
             int avgScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return avgScore;
         }
@@ -94,20 +94,20 @@ namespace Leaderboard.DB.Implementations.Repositories
 
         public int GetWeeklyMax()
         {
-            string sql = $"SELECT MAX(Score) [WeeklyAvarage] " +
+            string sql = $"SELECT MAX(Score) [WeeklyMax] " +
                 $"FROM (SELECT DATEPART(week, ScoreDate) [Week], SUM(Score)[Score]" +
                 $"    FROM UserScores" +
-                $"    GROUP BY DATEPART(week, ScoreDate)) weeklySum";
+                $"    GROUP BY DATEPART(week, ScoreDate), DATEPART(year,ScoreDate)) weeklySum";
             int maxScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return maxScore;
         }
 
         public int GetMonthlyMax()
         {
-            string sql = $"SELECT MAX(Score) [WeeklyAvarage] " +
+            string sql = $"SELECT MAX(Score) [MonthlyMax] " +
                $"FROM (SELECT DATEPART(month, ScoreDate) [Month], SUM(Score)[Score]" +
                $"    FROM UserScores" +
-               $"    GROUP BY DATEPART(month, ScoreDate)) weeklySum";
+               $"    GROUP BY DATEPART(month, ScoreDate)) monthlySum";
             int maxScore = _unitOfWork.Connection.Query<int>(sql).FirstOrDefault();
             return maxScore;
         }
@@ -145,7 +145,6 @@ namespace Leaderboard.DB.Implementations.Repositories
                 bool updateFlag = GetByDate(scoreDate, user.Id);
                 if (updateFlag)
                 {
-
                     sql = "UPDATE UserScores Set Score = @Score, UpdateDate = @UpdateDate WHERE UserId = @UserId";
                     _unitOfWork.Connection.Query<int>(sql,
                         new
